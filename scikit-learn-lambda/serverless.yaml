@@ -14,6 +14,7 @@ functions:
     timeout: 30
     memorySize: 1024
     handler: scikit_learn_lambda.handler
+    role: arn:aws:iam::673499572719:role/LambdaS3ReadOnly
     layers:
       # Modify this layer to the one that encodes your scikit-learn dependency.
       # List of prebuilt layers are provided in layers.csv
@@ -32,7 +33,8 @@ functions:
       #   should also uncomment the IAM resources below and add a custom role
       #   to this function that gives you read access to the appropriate
       #   bucket.
-      SKLEARN_MODEL_PATH: "model.joblib"
+      SKLEARN_MODEL_PATH: ${opt:model_s3_path}
+      SKLEARN_SCALER_PATH: ${opt:scaler_s3_path}
     events:
       - http:
           path: predict
@@ -46,30 +48,3 @@ package:
     - "tests/**"
     - ".tox/**"
     - "*.egg-info/**"
-
-# Uncomment this if loading your model from S3.
-# resources:
-#   ScikitLearnLambdaRole:
-#     Type: AWS::IAM::Role
-#     Properties:
-#       RoleName: ScikitLearnLambdaRole
-#       AssumeRolePolicyDocument:
-#         Version: '2012-10-17'
-#         Statement:
-#           - Effect: Allow
-#             Principal:
-#               Service:
-#                 - lambda.amazonaws.com
-#             Action: sts:AssumeRole
-#       Policies:
-#         - PolicyName: ModelInfoGetObjectPolicy-${self:custom.stage}
-#           PolicyDocument:
-#             Version: '2012-10-17'
-#             Statement:
-#               - Effect: Allow
-#                 Action: ["s3:GetObject"]
-#                 TODO: Modify this resource ARN to the location of your model
-#                 file. See
-#                 https://docs.aws.amazon.com/AmazonS3/latest/dev/s3-arn-format.html
-#                 for examples.
-#                 Resource: "arn:aws:s3:::modelzoo-examples/model.joblib"

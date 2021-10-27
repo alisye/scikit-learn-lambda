@@ -1,7 +1,5 @@
 import json
-
 import numpy as np
-
 from . import cache
 
 
@@ -23,21 +21,14 @@ def convert_bytes_to_str(arr):
 
 
 def get_probabilities(model, input_):
-    probabilities = model.predict_proba(input_)
+    probabilities = model.predict_proba(input_)[:, 1]
     probabilities = convert_bytes_to_str(probabilities)
-    classes = [str(c) for c in model.classes_]
-    return [dict(zip(classes, p)) for p in probabilities]
-
-
-def get_prediction(model, input_):
-    prediction = model.predict(input_)
-    prediction = convert_bytes_to_str(prediction)
-    return prediction.tolist()
+    return probabilities
 
 
 def handler(event, _):
     try:
-        model = cache.Cache.get()
+        model, scaler, explainer = cache.Cache.get_model(), cache.Cache.get_scaler(), cache.Cache.get_explainer()
     except Exception as e:
         return handler_response(500, {"error": "Failed to load model: {}".format(e)})
 
@@ -54,33 +45,15 @@ def handler(event, _):
             {"error": "Failed to find an 'input' key in request body: {}".format(body)},
         )
 
-    return_prediction = body.get("return_prediction", True)
-    return_probabilities = body.get("return_probabilities", False)
-
-    if not (return_prediction or return_probabilities):
-        return handler_response(
-            400,
-            {
-                "error": "Must either specify return_prediction: True or "
-                "return_probabilities: True"
-            },
-        )
-
     response = {}
-    if return_prediction:
-        try:
-            response["prediction"] = get_prediction(model, body["input"])
-        except Exception as e:
-            return handler_response(
-                500, {"error": "Failed to get model prediction: {}".format(str(e))},
-            )
 
-    if return_probabilities:
-        try:
-            response["probabilities"] = get_probabilities(model, body["input"])
-        except Exception as e:
-            return handler_response(
-                500, {"error": "Failed to get model probabilities: {}".format(str(e))},
-            )
+    try:
+        inputs = scaler.transform(body["input"])
+        response["probabilities"] = get_probabilities(model, inputs)
+        response["feature_weights"] = explainer.explain(inputs)
+    except Exception as e:
+        return handler_response(
+            500, {"error": "Failed to get model probabilities: {}".format(str(e))},
+        )
 
     return handler_response(200, response)

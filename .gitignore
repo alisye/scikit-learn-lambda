@@ -146,3 +146,6 @@ cython_debug/
 # Model-related
 benchmark/
 scikit-learn-lambda/*.joblib
+
+# pycharm
+.idea

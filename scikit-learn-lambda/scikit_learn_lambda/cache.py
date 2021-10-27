@@ -1,11 +1,11 @@
 import pickle
 import os
 import tempfile
-
 import boto3
 import joblib
 
 from . import s3_url
+from . import model_explainer
 
 
 def load_model_from_file(model_file):
@@ -29,15 +29,33 @@ def load_model_from_path(model_path):
 
 
 class Cache:
-    __instance = None
+    __model = None
+    __scaler = None
+    __explainer = None
 
     @staticmethod
-    def get():
-        if Cache.__instance is None:
-            Cache.__instance = load_model_from_path(os.environ["SKLEARN_MODEL_PATH"])
+    def get_model():
+        if Cache.__model is None:
+            Cache.__model = load_model_from_path(os.environ["SKLEARN_MODEL_PATH"])
 
-        return Cache.__instance
+        return Cache.__model
+
+    @staticmethod
+    def get_scaler():
+        if Cache.__scaler is None:
+            Cache.__scaler = load_model_from_path(os.environ["SKLEARN_SCALER_PATH"])
+
+        return Cache.__scaler
+
+    @staticmethod
+    def get_explainer():
+        if Cache.__explainer is None:
+            Cache.__explainer = model_explainer.LinearExplainer(Cache.get_model())
+
+        return Cache.__explainer
 
     @staticmethod
     def clear():
-        Cache.__instance = None
+        Cache.__model = None
+        Cache.__scaler = None
+        Cache.__explainer = None
