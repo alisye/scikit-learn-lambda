@@ -18,7 +18,7 @@ functions:
     layers:
       # Modify this layer to the one that encodes your scikit-learn dependency.
       # List of prebuilt layers are provided in layers.csv
-      - arn:aws:lambda:us-west-2:446751924810:layer:python-3-7-scikit-learn-0-23-1:4
+      - arn:aws:lambda:us-west-2:673499572719:layer:python-3-7-scikit-learn-0-23-0:1
     environment:
       # Modify this to environment variable to point towards your model file.
       # You have two options:

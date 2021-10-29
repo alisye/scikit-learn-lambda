@@ -1,0 +1,2 @@
+Python version,scikit-learn version,region,arn
+3.7,0.23.0,us-west-2,arn:aws:lambda:us-west-2:673499572719:layer:python-3-7-scikit-learn-0-23-0:

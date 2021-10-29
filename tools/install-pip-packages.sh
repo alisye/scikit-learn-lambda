@@ -12,7 +12,6 @@ PIP_PACKAGE=$1
 TARGET_DIR=$2
 
 pip install $PIP_PACKAGE -t $TARGET_DIR
-find $TARGET_DIR -type f -name "*.so" | xargs -r strip
 find $TARGET_DIR -type f -name "*.pyc" | xargs -r rm
 find $TARGET_DIR -type d -name "__pycache__" | xargs -r rm -r
 find $TARGET_DIR -type d -name "*.dist-info" | xargs -r rm -r
